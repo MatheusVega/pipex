@@ -6,31 +6,43 @@
 /*   By: mathfern <mathfern@student.42sp.org.br>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/09 19:57:28 by mathfern          #+#    #+#             */
-/*   Updated: 2021/10/11 21:35:13 by mathfern         ###   ########.fr       */
+/*   Updated: 2021/11/05 16:58:02 by mathfern         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/pipex.h";
+#include "../include/pipex.h"
 
-void	pipex(int f1, int f2, char *cmd1, char *cmd2)
+void	ft_freecmd(char ***cmd)
 {
-	int		end[2];
-	int		status;
-	pid_t	child1;
-	pid_t	child2;
+	int		i;
 
-	pipe(end);
-	child1 = fork();
-	if (child1 < 0)
-		return (-1);
-	if (child1 == 0)
-		return (1);
-	child2 = fork();
-	if (child2 < 0)
-		return (-1);
-	if (child2 == 0)
-		return (1);
-	close(end[0]);
-	close(end[1]);
-	waitpid();
+	i = -1;
+	while ((*cmd)[++i])
+		free((*cmd)[i]);
+	free(*cmd);
+}
+
+void	ft_pipex(int fdin, char *path, char **env, char **cmd)
+{
+	pid_t	pid;
+	int		pfd[2];
+
+	ft_exit(pipe(pfd), "deu ruim pipe");
+	ft_exit(pid = fork(), "");
+	if (pid)
+	{
+		close(pfd[1]);
+		dup2(pfd[0], STDIN_FILENO);
+		waitpid(pid, NULL, 0);
+	}
+	else
+	{
+		close(pfd[0]);
+		dup2(pfd[1], STDOUT_FILENO);
+		if (fdin == STDIN_FILENO)
+			exit(1);
+		else
+			ft_execve(path, cmd, env);
+		ft_freecmd(&cmd);
+	}
 }
